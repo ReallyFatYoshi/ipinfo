@@ -2,6 +2,7 @@ import net from 'net';
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import { load }  from 'cheerio';
 import { isVpn, updateList } from './libs/is-ip.js';
 
 const app = express();
@@ -27,14 +28,22 @@ app.get('/:ip', async (req, reply) => {
     }
 
     try {
+        const content = await fetch(`https://www.iana.org/whois?q=${ip}`).then((response) => response.text());
+        const $ = load(content);
+        const text = $.text($(`pre`));
+        const organisation = text.match(/(?<=organisation\:)([A-Za-z0-9 ]+)$/gm)[0].trim();
         reply.json({
             ip,
+            organisation,
             is_vpn: await isVpn(ip),
             is_ip4: net.isIPv4(ip),
             is_ip6: net.isIPv6(ip),
         })
     } catch (e) {
-        console.error(e);
+        return reply.status(400).json({
+            statusCode: 400,
+            error: "Invalid ip address"
+        });
     }
 });
 
