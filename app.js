@@ -32,8 +32,12 @@ app.get('/:ip', async (req, reply) => {
     }
 
     try {
-        const content = await fetch(`https://www.iana.org/whois?q=${ip}`).then((response) => response.text());
-        const domains = await reverseLookUp(ip).catch(() => null);
+        const list = await Promise.all([
+            fetch(`https://www.iana.org/whois?q=${ip}`).then((response) => response.text()),
+            reverseLookUp(ip).catch(() => null),
+        ]);
+        const content = list[0];
+        const domains = list[1];
         const records = await lookup(domains?.at(0)).catch(() => null);
         const $ = load(content);
         const text = $.text($(`pre`));
@@ -49,7 +53,7 @@ app.get('/:ip', async (req, reply) => {
         })
     } catch (e) {
         console.error(e);
-        return reply.status(400).json({
+        reply.status(400).json({
             statusCode: 400,
             error: "Invalid ip address"
         });
