@@ -9,7 +9,7 @@ async function lookup(hostname) {
     return new Promise((resolve, reject) => {
         dns.lookup(hostname, {
             hints: dns.ALL,
-            all: true
+            all: true,
         },
             (error, hostnames) => {
                 if (error) {
