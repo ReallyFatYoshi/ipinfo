@@ -31,7 +31,7 @@ app.get('/:ip', async (req, reply) => {
     }
 
     try {
-        const [extra, domains] = await Promise.all([
+        /*const [extra, domains] = await Promise.all([
             fetch(`https://geoip.maxmind.com/geoip/v2.1/city/${ip}?demo=1&use-downloadable-db=1`,
                 {
                     headers: {
@@ -41,18 +41,18 @@ app.get('/:ip', async (req, reply) => {
                 }
             ).then((response) => response.json()),
             reverseLookUp(ip).catch(() => null),
-        ]);
+        ]);*/
 
         const records = await lookup(domains?.at(0)).catch(() => null);
 
         reply.json({
             ip,
-            domains,
+            //domains,
             records,
             is_vpn: await isVpn(ip),
             is_ip4: net.isIPv4(ip),
             is_ip6: net.isIPv6(ip),
-            ...extra
+            //...extra
         })
     } catch (e) {
         console.error(e);
